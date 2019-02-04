@@ -1,0 +1,8 @@
+kind: pipeline
+name: default
+steps:
+- name: build
+- name: publish
+- name: release
+
+# TODO:
