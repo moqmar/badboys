@@ -21,4 +21,8 @@ steps:
     bucket: get
     source: /go/src/codeberg.org/momar/badboys/badboys
     target: /
+    access_key:
+      from_secret: access_key
+    secret_key:
+      from_secret: secret_key
 #- name: release
