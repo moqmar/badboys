@@ -1,0 +1,6 @@
+[Unit]
+Description=BAckup DataBases On Your Server
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/badboys

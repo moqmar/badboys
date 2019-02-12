@@ -11,9 +11,10 @@
 
 ## Installation
 ```
-sudo wget https://get.momar.io/badboys -O /usr/local/bin/
+sudo wget https://get.mo-mar.de/badboys -O /usr/local/bin/
 sudo chmod +x /usr/local/bin/badboys
-echo "0 * * * * | sudo tee /etc/cron.d/badboys
+sudo wget https://codeberg.org/momar/badboys/raw/branch/master/resources/badboys.{service,timer} -O /etc/systemd/system
+sudo systemctl enable badboys.timer
 ```
 
 ## Usage
