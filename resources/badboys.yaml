@@ -1,0 +1,21 @@
+# List of folders with "databases.yaml" files to back up; can also contain wildcards
+repositories:
+- /var/backup/badboys
+
+# See https://golang.org/pkg/time/#pkg-constants for an explanation of the format
+filename: 2006-01-02.15-04
+
+# How many backups to keep, if one condition matches (true: keep all, false: ignore)
+retention:
+  latest: 3      # always keep the latest backup
+  hourly: false  # don't keep hourly backups
+  daily: 7       # keep daily backups for 7 days
+  weekly: 4      # keep weekly backups for 4 weeks
+  monthly: 12    # keep monthly backups for 12 weeks
+  yearly: true   # keep one yearly backup forever
+
+# Use locally installed client tools instead of the momar/badboys-tools docker image
+localTools: false
+
+# Shell command to run on completion; gets the exit code of badboys as $1.
+oncomplete: ""

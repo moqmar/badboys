@@ -6,7 +6,52 @@ import (
 	"net/url"
 	"os"
 	"path"
+
+	"github.com/moqmar/gonfig"
 )
+
+func backupDir(dir string) {
+	running++
+
+	fmt.Printf("Backing up databases from: %s\n", dir)
+	repo := gonfig.Open(path.Join(dir, "databases.yaml"))
+
+	dirRunning := 0
+	dirUpdate := make(chan bool)
+	for name, uri := range repo.StringMap() {
+		dirRunning++
+		go backupAndPrune(dirUpdate, name, uri, dir)
+	}
+
+	for <-dirUpdate {
+		dirRunning--
+		if dirRunning <= 0 {
+			break
+		}
+	}
+
+	running--
+	update <- running
+}
+
+func backupAndPrune(dirUpdate chan bool, name string, uri string, dir string) {
+	err := backup(name, uri, dir)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		result = 1
+
+		dirUpdate <- true
+		return
+	}
+
+	err = prune(name, dir)
+	if err != nil {
+		fmt.Printf("%s\n", err)
+		result = 1
+	}
+
+	dirUpdate <- true
+}
 
 func backup(name, rawuri, dir string) error {
 	var extension string
@@ -16,18 +61,12 @@ func backup(name, rawuri, dir string) error {
 		return fmt.Errorf("[%s] - url error: %s", name, err)
 	}
 
-	switch uri.Scheme {
-	case "sqlite3":
-		extension, content, err = sqlite3(uri)
-	case "mysql":
-		extension, content, err = mysql(uri)
-	case "postgres":
-		extension, content, err = postgres(uri)
-	case "mongodb":
-		extension, content, err = mongodb(uri)
-	default:
+	driver, ok := drivers[uri.Scheme]
+	if !ok {
 		return fmt.Errorf("[%s] - no handler for %s databases", name, uri.Scheme)
 	}
+
+	extension, content, err = driver.Backup(uri)
 	if err != nil {
 		return fmt.Errorf("[%s] - database error: %s", name, err)
 	}
@@ -45,8 +84,4 @@ func backup(name, rawuri, dir string) error {
 	}
 
 	return nil
-}
-
-func filename() string {
-	return now.Format(cfg.Get("filename").Default("2006-01-02.15-04").String())
 }

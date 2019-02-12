@@ -1,8 +1,24 @@
 kind: pipeline
 name: default
+workspace:
+  base: /go
+  path: src/codeberg.org/momar/badboys
 steps:
 - name: build
+  image: golang
+  commands:
+  - go get
+  - CGO_ENABLED=0 GOOS=linux go build -a -v -tags netgo -o badboys .
+#- name: test
+#  image: busybox
+#  commands:
+#  - echo 
+#  - /go/src/codeberg.org/momar/badboys/badboys
 - name: publish
-- name: release
-
-# TODO:
+  image: plugins/s3
+  settings:
+    endpoint: https://minio.mo-mar.de
+    bucket: get
+    source: /go/src/codeberg.org/momar/badboys/badboys
+    target: /
+#- name: release
